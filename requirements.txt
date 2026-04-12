@@ -1,44 +1,20 @@
-altgraph==0.17.5
-blinker==1.9.0
-certifi==2025.8.3
-cffi==2.0.0
-charset-normalizer==3.4.4
-click==8.2.1
-colorama==0.4.6
-cryptography==46.0.5
-curl_cffi==0.13.0
-et_xmlfile==2.0.0
-Flask==3.1.1
-google-api-core==2.30.0
+# ── Dépendances runtime ───────────────────────────────────────────────────────
+
+# Téléchargement & conversion audio
+yt-dlp==2026.2.4
+
+# Lecture fichier Excel
+openpyxl==3.1.5
+
+# API Deezer
+requests==2.32.5
+
+# API YouTube (Google)
 google-api-python-client==2.190.0
 google-auth==2.48.0
-google-auth-httplib2==0.3.0
 google-auth-oauthlib==1.2.4
-googleapis-common-protos==1.72.0
-httplib2==0.31.2
-idna==3.11
-itsdangerous==2.2.0
-Jinja2==3.1.6
-MarkupSafe==3.0.2
-numpy==2.3.2
-oauthlib==3.3.1
-openpyxl==3.1.5
-packaging==25.0
-pefile==2024.8.26
-pillow==11.3.0
-proto-plus==1.27.1
-protobuf==6.33.5
-pyasn1==0.6.2
-pyasn1_modules==0.4.2
-pycparser==2.22
+google-auth-httplib2==0.3.0
+
+# ── Dépendances build (.exe) ──────────────────────────────────────────────────
+
 pyinstaller==6.18.0
-pyinstaller-hooks-contrib==2025.11
-pyparsing==3.3.2
-pywin32-ctypes==0.2.3
-requests==2.32.5
-requests-oauthlib==2.0.0
-rsa==4.9.1
-setuptools==80.9.0
-uritemplate==4.2.0
-urllib3==2.6.3
-Werkzeug==3.1.3

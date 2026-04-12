@@ -1,6 +1,13 @@
 import yt_dlp
 import os
 import re
+import sys
+
+def _ffmpeg_path():
+    """Retourne le dossier contenant ffmpeg (fonctionne en .exe et en script)."""
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS
+    return None
 
 def sanitize_filename(filename):
     """
@@ -9,7 +16,7 @@ def sanitize_filename(filename):
     """
     return re.sub(r'[\\/*?:"<>|]', "", filename)
 
-def download_and_convert_playlist(playlist_url, output_folder='playlists'):
+def download_and_convert_playlist(playlist_url, output_folder='playlists', on_progress=None):
     """
     Télécharge une playlist YouTube, convertit chaque vidéo en MP3 et l'organise
     dans un dossier portant le nom de la playlist.
@@ -20,35 +27,32 @@ def download_and_convert_playlist(playlist_url, output_folder='playlists'):
     """
     print(f"Traitement de la playlist : {playlist_url}")
 
-    # --- Configuration pour yt-dlp ---
-    # C'est ici que toute la magie opère.
-    ydl_opts = {
-        # Options de format : on veut le meilleur audio possible
-        'format': 'bestaudio/best',
+    counter = {"done": 0, "total": 0}
 
-        # Options de post-traitement (conversion)
+    def progress_hook(d):
+        if d["status"] == "finished":
+            info = d.get("info_dict", {})
+            counter["total"] = info.get("playlist_count") or counter["total"]
+            counter["done"] += 1
+            title = info.get("title", "")
+            if on_progress:
+                on_progress(counter["done"], counter["total"], title)
+
+    # --- Configuration pour yt-dlp ---
+    ydl_opts = {
+        'format': 'bestaudio/best',
         'postprocessors': [{
-            # Clé pour la conversion en audio
             'key': 'FFmpegExtractAudio',
-            # Format de sortie souhaité
             'preferredcodec': 'mp3',
-            # Qualité audio (bitrate). 192 est un bon compromis.
             'preferredquality': '192',
         }],
-
-        # Options de nommage des fichiers et de sortie
         'outtmpl': {
-            # Définit le chemin de sortie pour chaque fichier.
-            # %(playlist_title)s : Titre de la playlist
-            # %(title)s - %(uploader)s : Titre de la vidéo suivi du nom de la chaîne
-            # %(ext)s : Extension du fichier (sera .mp3 grâce au post-processeur)
-            'default': os.path.join(output_folder, '%(playlist_title)s', '%(title)s - %(uploader)s.%(ext)s'),
+            'default': os.path.join(output_folder, '%(playlist_title)s', '%(playlist_index)s - %(title)s - %(uploader)s.%(ext)s'),
         },
-        
-        # Pour éviter de télécharger à nouveau les fichiers qui existent déjà
         'nooverwrites': True,
-        # Pour continuer les téléchargements interrompus
         'continue_dl': True,
+        'progress_hooks': [progress_hook],
+        **({'ffmpeg_location': _ffmpeg_path()} if _ffmpeg_path() else {}),
     }
 
     try:

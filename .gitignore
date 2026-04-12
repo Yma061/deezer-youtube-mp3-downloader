@@ -1,5 +1,15 @@
+# ── Fichiers sensibles ────────────────────────────────────────────────────────
 client_secret.json
 token.json
-__pycache__/
+token_*.json
+progression_*.json
 
+# ── Dossiers générés ──────────────────────────────────────────────────────────
+__pycache__/
+build/
+dist/
+*.spec
+
+# ── Contenu téléchargé ────────────────────────────────────────────────────────
 playlists/
+playlist excel/
