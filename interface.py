@@ -289,12 +289,19 @@ class StreamingSelectPage(tk.Frame):
                   command=self.app.toggle_theme).pack(side="right", padx=16)
 
         tk.Label(self, text="Choisissez votre plateforme", font=FONT,
-                 bg=BG, fg=FG2).pack(pady=(40, 28))
+                 bg=BG, fg=FG2).pack(pady=(30, 20))
 
-        cards_frame = tk.Frame(self, bg=BG)
-        cards_frame.pack()
-        for card in self.CARDS:
-            self._make_card(cards_frame, card)
+        # Rangée 1 — Deezer + Spotify
+        row1 = tk.Frame(self, bg=BG)
+        row1.pack(pady=(0, 14))
+        for card in self.CARDS[:2]:
+            self._make_card(row1, card)
+
+        # Rangée 2 — SoundCloud + Apple Music
+        row2 = tk.Frame(self, bg=BG)
+        row2.pack()
+        for card in self.CARDS[2:]:
+            self._make_card(row2, card)
 
     def _make_card(self, parent, card):
         color = card["color"]

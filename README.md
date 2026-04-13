@@ -4,8 +4,8 @@ Application Windows avec interface graphique pour télécharger et gérer des pl
 
 ## Téléchargement
 
-Dernière version : **v1.1.0**  
-**[⬇ Télécharger PlaylistManager.exe](https://github.com/Yma061/deezer-youtube-mp3-downloader/releases/download/v1.1.0/PlaylistManager.exe)**
+Dernière version : **v1.2.0**  
+**[⬇ Télécharger PlaylistManager.exe](https://github.com/Yma061/deezer-youtube-mp3-downloader/releases/download/v1.2.0/PlaylistManager.exe)**
 
 > Windows uniquement — aucune installation requise, double-cliquez pour lancer.
 
@@ -27,11 +27,27 @@ Windows peut afficher un message de sécurité car le fichier n'est pas signé p
 
 ---
 
+## Aperçu
+
+![Aperçu de l'application](docs/Exemple.png)
+
+![Aperçu d'une page de mode](docs/Exemple2.png)
+
+---
+
 ## Fonctionnalités
 
-### 🎵 Deezer → YouTube
-Importe une playlist Deezer dans ta bibliothèque YouTube automatiquement.
-- Connexion Google intégrée — une fenêtre s'ouvre dans le navigateur au premier lancement, la connexion est mémorisée ensuite
+### 🎵 Streaming → YouTube
+Importe une playlist depuis ta plateforme préférée dans ta bibliothèque YouTube.
+
+| Plateforme | API requise | Compte développeur |
+|---|---|---|
+| Deezer | Non | Non |
+| Spotify | Non | Non |
+| SoundCloud | Non | Non |
+| Apple Music | Non | Non |
+
+- Connexion Google intégrée — une fenêtre s'ouvre dans le navigateur au premier lancement
 - Reprise automatique si la limite quotidienne de l'API est atteinte
 - Limite : ~66 titres/jour (quota Google de 10 000 unités/jour)
 
@@ -60,12 +76,13 @@ Télécharge des musiques dans l'ordre défini dans un fichier Excel.
 
 ## Utilisation
 
-### Deezer → YouTube
+### Streaming → YouTube
 1. Lance l'application
-2. Clique sur **Deezer → YouTube**
-3. Entre l'ID de ta playlist Deezer (le nombre à la fin de l'URL)
-4. Clique sur **Lancer** — une fenêtre de connexion Google s'ouvre au premier lancement
-5. La connexion est mémorisée pour les prochaines fois
+2. Clique sur **Streaming → YouTube**
+3. Choisis ta plateforme (Deezer, Spotify, SoundCloud ou Apple Music)
+4. Colle l'URL ou l'ID de ta playlist
+5. Clique sur **Lancer** — une fenêtre de connexion Google s'ouvre au premier lancement
+6. La connexion est mémorisée pour les prochaines fois
 
 ### YouTube → MP3
 1. Clique sur **YouTube → MP3**
@@ -97,4 +114,4 @@ pyinstaller PlaylistManager.spec
 
 ## Technologies
 
-Python · Tkinter · yt-dlp · Deezer API · YouTube Data API v3 · openpyxl · keyring · PyInstaller
+Python · Tkinter · yt-dlp · spotdl · Deezer API · Spotify · SoundCloud · Apple Music · YouTube Data API v3 · openpyxl · keyring · PyInstaller
