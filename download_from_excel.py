@@ -5,6 +5,7 @@ import re
 import sys
 import time
 import random
+import socket
 
 def _ffmpeg_path():
     if getattr(sys, 'frozen', False):
@@ -13,14 +14,38 @@ def _ffmpeg_path():
 
 EXCEL_PATH = "playlist excel/10 - 1er mai 2026 prévisions_v12 du 04_01_2026.xlsx"
 SHEET_NAME = "Deezer"
-TITRE_COLUMN = 5       # Colonne E = "titre (artiste)"
-FIRST_ROW = 7          # Les données commencent à la ligne 7
+TITRE_COLUMN = 5
+FIRST_ROW = 7
 OUTPUT_FOLDER = "playlists"
 PLAYLIST_NAME = "1er mai 2026"
+MAX_RETRIES = 3
 
 
 def sanitize_filename(filename):
     return re.sub(r'[\\/*?:"<>|]', "", filename)
+
+
+def is_connected():
+    try:
+        socket.setdefaulttimeout(3)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+        return True
+    except Exception:
+        return False
+
+
+def wait_for_connection(print_fn=print):
+    if is_connected():
+        return
+    print_fn("  Connexion perdue — attente du retour internet...")
+    while not is_connected():
+        time.sleep(5)
+    print_fn("  Connexion rétablie, reprise du téléchargement.")
+
+
+def get_sheets(excel_path):
+    wb = openpyxl.load_workbook(excel_path, read_only=True, data_only=True)
+    return wb.sheetnames
 
 
 def get_tracks_from_excel(excel_path, sheet_name, titre_col, first_row):
@@ -43,7 +68,7 @@ def download_tracks(tracks, output_folder, playlist_name, on_progress=None):
     print(f"{total} titres à télécharger dans '{dest}'\n")
 
     for index, titre in enumerate(tracks, start=1):
-        num = str(index).zfill(len(str(total)))  # ex: 001, 002...
+        num = str(index).zfill(len(str(total)))
         out_path = os.path.join(dest, f"{num} - %(title)s.%(ext)s")
 
         ydl_opts = {
@@ -58,17 +83,33 @@ def download_tracks(tracks, output_folder, playlist_name, on_progress=None):
             'quiet': True,
             'no_warnings': True,
             'default_search': 'ytsearch1',
+            'socket_timeout': 20,
             **({'ffmpeg_location': _ffmpeg_path()} if _ffmpeg_path() else {}),
         }
 
         print(f"[{index}/{total}] {titre}")
         if on_progress:
             on_progress(index - 1, total, titre)
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([titre])
-        except Exception as e:
-            print(f"  ERREUR : {e}")
+
+        success = False
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([titre])
+                success = True
+                break
+            except Exception as e:
+                err = str(e).lower()
+                is_network = any(k in err for k in ("timed out", "connection", "network", "read timed"))
+                if is_network:
+                    wait_for_connection()
+                if attempt < MAX_RETRIES:
+                    print(f"  Tentative {attempt}/{MAX_RETRIES} échouée, nouvel essai...")
+                    time.sleep(3)
+                else:
+                    print(f"  ERREUR après {MAX_RETRIES} tentatives : {e}")
+
+        if not success:
             failed.append(f"{num} - {titre}")
 
         if on_progress:
@@ -89,6 +130,8 @@ def download_tracks(tracks, output_folder, playlist_name, on_progress=None):
         print(f"\n{len(failed)} titre(s) non trouvé(s) — voir '{log_path}'")
     else:
         print("Tous les titres ont été téléchargés avec succès !")
+
+    return dest, failed
 
 
 if __name__ == "__main__":
