@@ -107,8 +107,9 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Playlist Manager")
-        self.geometry("780x600")
-        self.resizable(False, False)
+        self.geometry("1050x680")
+        self.resizable(True, True)
+        self.minsize(900, 600)
         self.configure(bg=BG)
         self._page  = "home"
         self._mode  = None
@@ -125,10 +126,11 @@ class App(tk.Tk):
         _apply_theme(new)
         self.configure(bg=BG)
         self.container.configure(bg=BG)
-        if   self._page == "home":         self.show_home()
-        elif self._page == "detail":       self.show_detail(self._mode)
-        elif self._page == "json_help":    self.show_json_help(self._mode)
-        elif self._page == "deezer_help":  self.show_deezer_id_help(self._mode)
+        if   self._page == "home":              self.show_home()
+        elif self._page == "streaming_select":  self.show_streaming_select()
+        elif self._page == "detail":            self.show_detail(self._mode)
+        elif self._page == "json_help":         self.show_json_help(self._mode)
+        elif self._page == "deezer_help":       self.show_deezer_id_help(self._mode)
 
     def show_home(self):
         self._page = "home"; self.clear()
@@ -142,6 +144,10 @@ class App(tk.Tk):
         self._page = "json_help"; self._mode = back_mode; self.clear()
         JsonHelpPage(self.container, self, back_mode)
 
+    def show_streaming_select(self):
+        self._page = "streaming_select"; self.clear()
+        StreamingSelectPage(self.container, self)
+
     def show_deezer_id_help(self, back_mode):
         self._page = "deezer_help"; self._mode = back_mode; self.clear()
         DeezerIdHelpPage(self.container, self, back_mode)
@@ -150,9 +156,9 @@ class App(tk.Tk):
 # ── Page d'accueil ────────────────────────────────────────────────────────────
 class HomePage(tk.Frame):
     CARDS = [
-        {"mode": "deezer",  "color": ACCENT1, "icon": "🎵",
-         "title": "Deezer  →  YouTube",
-         "desc":  "Importe une playlist Deezer\ndans ta bibliothèque YouTube"},
+        {"mode": "streaming", "color": ACCENT1, "icon": "🎵",
+         "title": "Streaming  →  YouTube",
+         "desc":  "Importe une playlist Deezer ou Spotify\ndans ta bibliothèque YouTube"},
         {"mode": "youtube", "color": ACCENT2, "icon": "▶",
          "title": "YouTube  →  MP3",
          "desc":  "Télécharge une playlist YouTube\net convertit chaque vidéo en MP3"},
@@ -195,7 +201,7 @@ class HomePage(tk.Frame):
             tk.Label(self, text="Téléchargements récents", font=FONT_H2,
                      bg=BG, fg=FG2).pack(pady=(10, 4))
             for entry in history[:5]:
-                mode_colors = {"deezer": ACCENT1, "youtube": ACCENT2, "excel": ACCENT3}
+                mode_colors = {"deezer": ACCENT1, "spotify": ACCENT_SPOTIFY, "soundcloud": ACCENT_SOUNDCLOUD, "applemusic": ACCENT_APPLE, "youtube": ACCENT2, "excel": ACCENT3}
                 color = mode_colors.get(entry.get("mode", ""), FG2)
                 row = tk.Frame(self, bg=BG)
                 row.pack(fill="x", padx=60, pady=2)
@@ -219,6 +225,83 @@ class HomePage(tk.Frame):
         frame.pack(side="left", padx=14)
         tk.Label(frame, text=card["icon"], font=("Segoe UI", 28), bg=color, fg="white").pack()
         tk.Label(frame, text=card["title"], font=FONT_H2,   bg=color, fg="white").pack(pady=(6,4))
+        tk.Label(frame, text=card["desc"],  font=FONT_SMALL, bg=color, fg="white",
+                 justify="center").pack()
+        def _on_click(e, m=card["mode"]):
+            if m == "streaming":
+                self.app.show_streaming_select()
+            else:
+                self.app.show_detail(m)
+        for w in [frame] + frame.winfo_children():
+            w.bind("<Button-1>", _on_click)
+
+        def on_enter(e, f=frame, c=color):
+            f.configure(bg=_lighten(c))
+            for w in f.winfo_children(): w.configure(bg=_lighten(c))
+        def on_leave(e, f=frame, c=color):
+            f.configure(bg=c)
+            for w in f.winfo_children(): w.configure(bg=c)
+        frame.bind("<Enter>", on_enter); frame.bind("<Leave>", on_leave)
+        for w in frame.winfo_children():
+            w.bind("<Enter>", on_enter); w.bind("<Leave>", on_leave)
+
+
+# ── Page sélection plateforme streaming ──────────────────────────────────────
+ACCENT_SPOTIFY     = "#1db954"
+ACCENT_SOUNDCLOUD  = "#ff5500"
+ACCENT_APPLE       = "#fc3c44"
+
+class StreamingSelectPage(tk.Frame):
+    CARDS = [
+        {"mode": "deezer",  "color": ACCENT1,       "icon": "🎵",
+         "title": "Deezer  →  YouTube",
+         "desc":  "Importe une playlist Deezer\ndans ta bibliothèque YouTube"},
+        {"mode": "spotify",     "color": ACCENT_SPOTIFY,    "icon": "🟢",
+         "title": "Spotify  →  YouTube",
+         "desc":  "Importe une playlist Spotify\ndans ta bibliothèque YouTube"},
+        {"mode": "soundcloud", "color": ACCENT_SOUNDCLOUD, "icon": "☁",
+         "title": "SoundCloud  →  YouTube",
+         "desc":  "Importe une playlist SoundCloud\ndans ta bibliothèque YouTube"},
+        {"mode": "applemusic", "color": ACCENT_APPLE,      "icon": "🍎",
+         "title": "Apple Music  →  YouTube",
+         "desc":  "Importe une playlist Apple Music\ndans ta bibliothèque YouTube"},
+    ]
+
+    def __init__(self, parent, app):
+        super().__init__(parent, bg=BG)
+        self.pack(fill="both", expand=True)
+        self.app = app
+        self._build()
+
+    def _build(self):
+        header = tk.Frame(self, bg=ACCENT1, pady=16)
+        header.pack(fill="x")
+        tk.Button(header, text="← Retour", font=FONT_SMALL,
+                  bg=ACCENT1, fg="white", bd=0, cursor="hand2",
+                  activebackground=_lighten(ACCENT1), activeforeground="white",
+                  command=self.app.show_home).pack(side="left", padx=16)
+        tk.Label(header, text="Streaming  →  YouTube", font=FONT_H2,
+                 bg=ACCENT1, fg="white").pack(side="left", padx=8)
+        icon = "☀" if _current_theme == "dark" else "🌙"
+        tk.Button(header, text=icon, font=FONT_SMALL,
+                  bg=ACCENT1, fg="white", bd=0, cursor="hand2",
+                  activebackground=_lighten(ACCENT1),
+                  command=self.app.toggle_theme).pack(side="right", padx=16)
+
+        tk.Label(self, text="Choisissez votre plateforme", font=FONT,
+                 bg=BG, fg=FG2).pack(pady=(40, 28))
+
+        cards_frame = tk.Frame(self, bg=BG)
+        cards_frame.pack()
+        for card in self.CARDS:
+            self._make_card(cards_frame, card)
+
+    def _make_card(self, parent, card):
+        color = card["color"]
+        frame = tk.Frame(parent, bg=color, cursor="hand2", padx=26, pady=20, bd=0)
+        frame.pack(side="left", padx=14)
+        tk.Label(frame, text=card["icon"], font=("Segoe UI", 32), bg=color, fg="white").pack()
+        tk.Label(frame, text=card["title"], font=FONT_H2,    bg=color, fg="white").pack(pady=(8, 4))
         tk.Label(frame, text=card["desc"],  font=FONT_SMALL, bg=color, fg="white",
                  justify="center").pack()
         for w in [frame] + frame.winfo_children():
@@ -255,6 +338,64 @@ MODES = {
              "placeholder": "ex : 14838804003"},
         ],
         "run": "run_deezer",
+    },
+    "spotify": {
+        "color": ACCENT_SPOTIFY, "title": "Spotify  →  YouTube",
+        "what": ("Récupère tous les titres d'une playlist Spotify et les importe "
+                 "automatiquement dans une nouvelle playlist YouTube sur ton compte Google."),
+        "needs": [
+            "L'URL de ta playlist Spotify  (ex : https://open.spotify.com/playlist/...)",
+            "La playlist doit être publique",
+            "Une connexion internet",
+            "Au premier lancement : connexion à ton compte Google dans le navigateur",
+            "✅  Connexion mémorisée — tu n'auras à te connecter qu'une seule fois.",
+            "⚠  Limite YouTube : 10 000 unités/jour — chaque titre coûte 150 unités.",
+            "✅  Reprise automatique : relancez avec la même URL, l'import reprend là où il s'est arrêté.",
+        ],
+        "inputs": [
+            {"label": "URL de la playlist Spotify", "key": "spotify_url",
+             "placeholder": "https://open.spotify.com/playlist/..."},
+        ],
+        "run": "run_spotify",
+    },
+    "soundcloud": {
+        "color": ACCENT_SOUNDCLOUD, "title": "SoundCloud  →  YouTube",
+        "what": ("Récupère tous les titres d'une playlist SoundCloud publique et les importe "
+                 "automatiquement dans une nouvelle playlist YouTube sur ton compte Google."),
+        "needs": [
+            "L'URL de ta playlist SoundCloud  (ex : https://soundcloud.com/user/sets/playlist)",
+            "La playlist doit être publique",
+            "Une connexion internet",
+            "Au premier lancement : connexion à ton compte Google dans le navigateur",
+            "✅  Connexion mémorisée — tu n'auras à te connecter qu'une seule fois.",
+            "⚠  Limite YouTube : 10 000 unités/jour — chaque titre coûte 150 unités.",
+            "✅  Reprise automatique : relancez avec la même URL, l'import reprend là où il s'est arrêté.",
+        ],
+        "inputs": [
+            {"label": "URL de la playlist SoundCloud", "key": "soundcloud_url",
+             "placeholder": "https://soundcloud.com/user/sets/playlist"},
+        ],
+        "run": "run_soundcloud",
+    },
+    "applemusic": {
+        "color": ACCENT_APPLE, "title": "Apple Music  →  YouTube",
+        "what": ("Récupère tous les titres d'une playlist Apple Music publique et les importe "
+                 "automatiquement dans une nouvelle playlist YouTube sur ton compte Google. "
+                 "Aucun compte développeur Apple requis."),
+        "needs": [
+            "L'URL de ta playlist Apple Music  (ex : https://music.apple.com/fr/playlist/...)",
+            "La playlist doit être publique",
+            "Une connexion internet",
+            "Au premier lancement : connexion à ton compte Google dans le navigateur",
+            "✅  Connexion mémorisée — tu n'auras à te connecter qu'une seule fois.",
+            "⚠  Limite YouTube : 10 000 unités/jour — chaque titre coûte 150 unités.",
+            "✅  Reprise automatique : relancez avec la même URL, l'import reprend là où il s'est arrêté.",
+        ],
+        "inputs": [
+            {"label": "URL de la playlist Apple Music", "key": "apple_url",
+             "placeholder": "https://music.apple.com/fr/playlist/..."},
+        ],
+        "run": "run_applemusic",
     },
     "youtube": {
         "color": ACCENT2, "title": "YouTube  →  MP3",
@@ -328,7 +469,7 @@ class DetailPage(tk.Frame):
         tk.Label(body, text="Ce que ça fait", font=FONT_H2,
                  bg=BG, fg=color, anchor="w").pack(fill="x")
         tk.Label(body, text=self.cfg["what"], font=FONT,
-                 bg=BG, fg=FG, wraplength=680, justify="left",
+                 bg=BG, fg=FG, wraplength=900, justify="left",
                  anchor="w").pack(fill="x", pady=(4, 14))
 
         tk.Label(body, text="Ce dont vous avez besoin", font=FONT_H2,
@@ -354,7 +495,7 @@ class DetailPage(tk.Frame):
         self.lbl_status  = tk.Label(self.progress_frame, text="", font=FONT_H2, bg=BG2, fg=FG)
         self.lbl_status.pack(anchor="w")
         self.progressbar = ttk.Progressbar(self.progress_frame, orient="horizontal",
-                                           mode="determinate", length=680)
+                                           mode="determinate", length=900)
         self.progressbar.pack(fill="x", pady=(8, 4))
         row_info = tk.Frame(self.progress_frame, bg=BG2)
         row_info.pack(fill="x")
@@ -643,6 +784,201 @@ class DetailPage(tk.Frame):
         except Exception as e:
             print(f"ERREUR : {e}")
 
+    def run_spotify(self):
+        import re
+        url = self._get("spotify_url")
+        if not url:
+            print("Erreur : veuillez entrer une URL de playlist Spotify."); return
+        match = re.search(r'playlist/([a-zA-Z0-9]+)', url)
+        if not match:
+            print("Erreur : URL de playlist Spotify invalide."); return
+        playlist_id = match.group(1)
+
+        try:
+            from spotify import get_spotify_tracks
+            from youtube import get_youtube_service, create_playlist, add_videos, QuotaExceededError
+
+            progress_file = os.path.join(_app_dir(), f"progression_spotify_{playlist_id}.json")
+            progress = {}
+            if os.path.exists(progress_file):
+                with open(progress_file, "r", encoding="utf-8") as f:
+                    progress = json.load(f)
+
+            print("Récupération des titres Spotify...")
+            tracks = get_spotify_tracks(url)
+            total  = len(tracks)
+            print(f"{total} morceaux récupérés.")
+
+            start_index = progress.get("completed", 0)
+            playlist_id_yt = progress.get("playlist_id_yt")
+
+            youtube = get_youtube_service()
+
+            if start_index > 0:
+                print(f"\n Reprise détectée — {start_index}/{total} titres déjà ajoutés.")
+                print(f" L'import reprend à partir du titre {start_index + 1}.\n")
+            else:
+                print("Création de la playlist YouTube...")
+                playlist_id_yt = create_playlist(youtube, "Importée depuis Spotify")
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": 0, "total": total}, f)
+
+            self.after(0, lambda t=total: self._show_progress(t))
+
+            def save_progress(completed):
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": completed, "total": total}, f)
+                track_name = tracks[completed-1] if completed <= len(tracks) else ""
+                self.update_progress(completed, track_name)
+
+            print("Ajout des vidéos...")
+            try:
+                add_videos(youtube, playlist_id_yt, tracks,
+                           start_index=start_index, on_success=save_progress)
+                os.remove(progress_file)
+                print(f"\n{'─'*50}")
+                print("Import terminé ! Tous les titres ont été ajoutés.")
+                print("Retrouvez votre playlist dans votre bibliothèque YouTube.")
+                save_history({"mode": "spotify", "name": f"Spotify {playlist_id}",
+                              "count": total, "date": _today(), "path": ""})
+            except QuotaExceededError as e:
+                done = int(str(e))
+                print(f"\n{'─'*50}")
+                print(f"⚠  Limite quotidienne YouTube atteinte après {done} titres.")
+                print(f"   Il reste {total-done} titre(s). Relancez demain avec la même URL.")
+        except Exception as e:
+            print(f"ERREUR : {e}")
+
+    def run_applemusic(self):
+        import re
+        url = self._get("apple_url")
+        if not url:
+            print("Erreur : veuillez entrer une URL de playlist Apple Music."); return
+        if "music.apple.com" not in url:
+            print("Erreur : URL Apple Music invalide."); return
+
+        playlist_id = re.sub(r'[^a-zA-Z0-9]', '_', url.split("music.apple.com/")[-1])[:40]
+
+        try:
+            from applemusic import get_applemusic_tracks
+            from youtube import get_youtube_service, create_playlist, add_videos, QuotaExceededError
+
+            progress_file = os.path.join(_app_dir(), f"progression_apple_{playlist_id}.json")
+            progress = {}
+            if os.path.exists(progress_file):
+                with open(progress_file, "r", encoding="utf-8") as f:
+                    progress = json.load(f)
+
+            print("Récupération des titres Apple Music...")
+            tracks = get_applemusic_tracks(url)
+            total  = len(tracks)
+            print(f"{total} morceaux récupérés.")
+
+            start_index    = progress.get("completed", 0)
+            playlist_id_yt = progress.get("playlist_id_yt")
+
+            youtube = get_youtube_service()
+
+            if start_index > 0:
+                print(f"\n Reprise détectée — {start_index}/{total} titres déjà ajoutés.")
+                print(f" L'import reprend à partir du titre {start_index + 1}.\n")
+            else:
+                print("Création de la playlist YouTube...")
+                playlist_id_yt = create_playlist(youtube, "Importée depuis Apple Music")
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": 0, "total": total}, f)
+
+            self.after(0, lambda t=total: self._show_progress(t))
+
+            def save_progress(completed):
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": completed, "total": total}, f)
+                track_name = tracks[completed-1] if completed <= len(tracks) else ""
+                self.update_progress(completed, track_name)
+
+            print("Ajout des vidéos...")
+            try:
+                add_videos(youtube, playlist_id_yt, tracks,
+                           start_index=start_index, on_success=save_progress)
+                os.remove(progress_file)
+                print(f"\n{'─'*50}")
+                print("Import terminé ! Tous les titres ont été ajoutés.")
+                print("Retrouvez votre playlist dans votre bibliothèque YouTube.")
+                save_history({"mode": "applemusic", "name": f"Apple {playlist_id[:25]}",
+                              "count": total, "date": _today(), "path": ""})
+            except QuotaExceededError as e:
+                done = int(str(e))
+                print(f"\n{'─'*50}")
+                print(f"⚠  Limite quotidienne YouTube atteinte après {done} titres.")
+                print(f"   Il reste {total-done} titre(s). Relancez demain avec la même URL.")
+        except Exception as e:
+            print(f"ERREUR : {e}")
+
+    def run_soundcloud(self):
+        import re
+        url = self._get("soundcloud_url")
+        if not url:
+            print("Erreur : veuillez entrer une URL de playlist SoundCloud."); return
+        if "soundcloud.com" not in url:
+            print("Erreur : URL SoundCloud invalide."); return
+
+        playlist_id = re.sub(r'[^a-zA-Z0-9]', '_', url.split("soundcloud.com/")[-1])
+
+        try:
+            from soundcloud import get_soundcloud_tracks
+            from youtube import get_youtube_service, create_playlist, add_videos, QuotaExceededError
+
+            progress_file = os.path.join(_app_dir(), f"progression_soundcloud_{playlist_id}.json")
+            progress = {}
+            if os.path.exists(progress_file):
+                with open(progress_file, "r", encoding="utf-8") as f:
+                    progress = json.load(f)
+
+            print("Récupération des titres SoundCloud...")
+            tracks = get_soundcloud_tracks(url)
+            total  = len(tracks)
+            print(f"{total} morceaux récupérés.")
+
+            start_index    = progress.get("completed", 0)
+            playlist_id_yt = progress.get("playlist_id_yt")
+
+            youtube = get_youtube_service()
+
+            if start_index > 0:
+                print(f"\n Reprise détectée — {start_index}/{total} titres déjà ajoutés.")
+                print(f" L'import reprend à partir du titre {start_index + 1}.\n")
+            else:
+                print("Création de la playlist YouTube...")
+                playlist_id_yt = create_playlist(youtube, "Importée depuis SoundCloud")
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": 0, "total": total}, f)
+
+            self.after(0, lambda t=total: self._show_progress(t))
+
+            def save_progress(completed):
+                with open(progress_file, "w", encoding="utf-8") as f:
+                    json.dump({"playlist_id_yt": playlist_id_yt, "completed": completed, "total": total}, f)
+                track_name = tracks[completed-1] if completed <= len(tracks) else ""
+                self.update_progress(completed, track_name)
+
+            print("Ajout des vidéos...")
+            try:
+                add_videos(youtube, playlist_id_yt, tracks,
+                           start_index=start_index, on_success=save_progress)
+                os.remove(progress_file)
+                print(f"\n{'─'*50}")
+                print("Import terminé ! Tous les titres ont été ajoutés.")
+                print("Retrouvez votre playlist dans votre bibliothèque YouTube.")
+                save_history({"mode": "soundcloud", "name": f"SoundCloud {playlist_id[:30]}",
+                              "count": total, "date": _today(), "path": ""})
+            except QuotaExceededError as e:
+                done = int(str(e))
+                print(f"\n{'─'*50}")
+                print(f"⚠  Limite quotidienne YouTube atteinte après {done} titres.")
+                print(f"   Il reste {total-done} titre(s). Relancez demain avec la même URL.")
+        except Exception as e:
+            print(f"ERREUR : {e}")
+
     def run_youtube(self):
         url = self._get("yt_url")
         if not url:
@@ -736,7 +1072,7 @@ def _help_steps(body, steps, color):
             tk.Label(row, text="→", font=FONT, bg=BG, fg=color,
                      width=2).pack(side="left", anchor="n")
             tk.Label(row, text=sub, font=FONT, bg=BG, fg=FG,
-                     wraplength=630, justify="left", anchor="w"
+                     wraplength=850, justify="left", anchor="w"
                      ).pack(side="left", fill="x", expand=True)
 
 
