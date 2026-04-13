@@ -4,7 +4,8 @@ Application Windows avec interface graphique pour télécharger et gérer des pl
 
 ## Téléchargement
 
-**[⬇ Télécharger PlaylistManager.exe](https://github.com/Yma061/deezer-youtube-mp3-downloader/releases/download/v1.0.0/PlaylistManager.exe)**
+Dernière version : 
+**[⬇ Télécharger PlaylistManager.exe](https://github.com/Yma061/deezer-youtube-mp3-downloader/releases/download/v1.1.0/PlaylistManager.exe)**
 
 > Windows uniquement — aucune installation requise, double-cliquez pour lancer.
 
