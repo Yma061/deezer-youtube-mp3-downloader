@@ -6,14 +6,21 @@ yt-dlp==2026.2.4
 # Lecture fichier Excel
 openpyxl==3.1.5
 
-# API Deezer
+# API Deezer / Apple Music / requêtes HTTP
 requests==2.32.5
+beautifulsoup4==4.14.3
+
+# Spotify (via spotdl — sans compte développeur)
+spotdl==4.4.3
 
 # API YouTube (Google)
 google-api-python-client==2.190.0
 google-auth==2.48.0
 google-auth-oauthlib==1.2.4
 google-auth-httplib2==0.3.0
+
+# Stockage sécurisé du token OAuth (Windows Credential Manager)
+keyring==25.7.0
 
 # ── Dépendances build (.exe) ──────────────────────────────────────────────────
 
