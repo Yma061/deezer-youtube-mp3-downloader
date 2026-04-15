@@ -7,7 +7,7 @@ yt-dlp==2026.2.21
 openpyxl==3.1.5
 
 # API Deezer / Apple Music / requêtes HTTP
-requests==2.33.0
+requests==2.33.1
 beautifulsoup4==4.14.3
 
 # Spotify (via spotdl — sans compte développeur)
