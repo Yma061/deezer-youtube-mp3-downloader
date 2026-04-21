@@ -15,7 +15,7 @@ spotdl==4.4.3
 
 # API YouTube (Google)
 google-api-python-client==2.190.0
-google-auth==2.48.0
+google-auth==2.49.2
 google-auth-oauthlib==1.2.4
 google-auth-httplib2==0.3.0
 
