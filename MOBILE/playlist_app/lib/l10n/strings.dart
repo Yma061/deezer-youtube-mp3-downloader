@@ -120,6 +120,21 @@ const Map<String, Map<String, dynamic>> kStrings = {
     'login_subtitle':  'Connectez votre compte Google pour\nimporter vos playlists sur YouTube.',
     'connect_google':  'Se connecter avec Google',
     'logout':          'Se déconnecter',
+
+    // Bibliothèque
+    'card_library_title': '🎧  Bibliothèque',
+    'card_library_desc':  'Télécharge des playlists en MP3\net écoute-les hors ligne dans l\'app',
+    'library_title':        'Bibliothèque',
+    'library_download':     'Télécharger une playlist',
+    'library_empty':        'Aucune playlist téléchargée',
+    'library_empty_hint':   'Appuie sur le bouton + pour\ntélécharger ta première playlist',
+    'library_tracks':       'titres',
+    'library_saved':        'sauvegardés',
+    'library_play_all':     'Tout lire',
+    'library_delete_title': 'Supprimer la playlist ?',
+    'library_delete_confirm': 'La playlist "%s" et tous ses titres seront supprimés.',
+    'cancel':               'Annuler',
+    'delete':               'Supprimer',
   },
   'en': {
     'app_title':        'Playlist Manager',
@@ -232,5 +247,20 @@ const Map<String, Map<String, dynamic>> kStrings = {
     'login_subtitle':  'Connect your Google account to\nimport your playlists to YouTube.',
     'connect_google':  'Connect with Google',
     'logout':          'Log out',
+
+    // Library
+    'card_library_title': '🎧  Library',
+    'card_library_desc':  'Download playlists as MP3\nand listen offline in the app',
+    'library_title':        'Library',
+    'library_download':     'Download a playlist',
+    'library_empty':        'No playlists downloaded',
+    'library_empty_hint':   'Tap the + button to download\nyour first playlist',
+    'library_tracks':       'tracks',
+    'library_saved':        'saved',
+    'library_play_all':     'Play all',
+    'library_delete_title': 'Delete playlist?',
+    'library_delete_confirm': 'Playlist "%s" and all its tracks will be deleted.',
+    'cancel':               'Cancel',
+    'delete':               'Delete',
   },
 };
